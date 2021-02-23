@@ -122,20 +122,27 @@ public class CodedInputStream {
             
             var bytes = [UInt8](repeating: 0, count: size)
             var pos = bufferSize - bufferPos
+
+            let a: UnsafeMutableRawPointer = &buffer + bufferPos
+            memcpy(&bytes, a, pos)
 //            let byPointer = UnsafeMutablePointerUInt8From(data: bytes)
-            memcpy(&bytes, &buffer[bufferPos], pos)
+//            memcpy(&bytes, &buffer[bufferPos], pos)
             bufferPos = bufferSize
             
             _ = try refillBuffer(mustSucceed: true)
             
             while size - pos > bufferSize {
-                memcpy(&bytes[pos], &buffer, bufferSize)
+                let b: UnsafeMutableRawPointer = &bytes + pos
+                memcpy(b, &buffer, bufferSize)
+//                memcpy(&bytes[pos], &buffer, bufferSize)
                 pos += bufferSize
                 bufferPos = bufferSize
                 _ = try refillBuffer(mustSucceed: true)
             }
             
-            memcpy(&bytes[pos], &buffer, size - pos)
+//            memcpy(&bytes[pos], &buffer, size - pos)
+            let c: UnsafeMutableRawPointer = &bytes + pos
+            memcpy(c, &buffer, size - pos)
             bufferPos = size - pos
             return Data(bytes:bytes, count:bytes.count)
             
@@ -176,10 +183,18 @@ public class CodedInputStream {
             var bytes = [UInt8](repeating: 0, count: size)
 //            let byPointer =  UnsafeMutablePointerUInt8From(data: bytes)
             var pos = originalBufferSize - originalBufferPos
-            memcpy(&bytes, &buffer[originalBufferPos], pos)
+            let bufferPos: UnsafeMutableRawPointer = &buffer + originalBufferPos
+            memcpy(&bytes, bufferPos, pos)
+
+            let d: UnsafeMutableRawPointer = &buffer + originalBufferPos
+            memcpy(&bytes, d, pos)
             for chunk in chunks {
-//                let chPointer =  UnsafeMutablePointerUInt8From(data: chunk)
-                memcpy(&bytes[pos], chunk, chunk.count)
+                let chPointer: UnsafeMutableRawPointer =  &bytes + pos
+                memcpy(chPointer, chunk, chunk.count)
+
+                let e: UnsafeMutableRawPointer = &bytes + pos
+                memcpy(e, chunk, chunk.count)
+                
                 pos += chunk.count
             }
             
